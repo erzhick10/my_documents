@@ -1,0 +1,39 @@
+version: '3'
+
+services:
+  teamcity:
+    image: jetbrains/teamcity-server
+    ports:
+      - "8112:8111"
+    volumes:
+      - ./data_dir:/data/teamcity_server/datadir
+      - ./teamcity-server-logs:/opt/teamcity/logs
+    
+
+  teamcity-agent-1:
+    image: jetbrains/teamcity-agent
+ #   privileged: true    
+    user: root
+    environment:
+      - SERVER_URL=http://teamcity:8111
+      - AGENT_NAME=regular_agent
+ #     - DOCKER_IN_DOCKER=start
+    volumes:
+      - ./data_dir_agent1:/data/teamcity_agent1/datadir
+      -  /var/run/docker.sock:/var/run/docker.sock
+      -  /usr/local/bin/docker:/usr/bin/docker 
+  teamcity-agent-2:
+    image: jetbrains/teamcity-minimal-agent
+    environment:
+      - SERVER_URL=http://teamcity:8111
+      - AGENT_NAME=minimal_agent
+    volumes:
+      - ./data_dir_agent2:/data/teamcity_agent2/datadir
+  
+  bitbucket:
+    image: atlassian/bitbucket-server
+    volumes:
+      - ./bitbucket_dir:/var/atlassian/application-data/bitbucket
+    ports:
+      - "7990:7990"
+      - "7999:7999"      
